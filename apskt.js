@@ -60,7 +60,7 @@ Apskt.extend(Apskt,{
         Apskt.on(id,'mouseout',funciton);
     },
 
-    /*悬浮*/
+    // 悬浮
     hover : function(id,fnOver,fnOut){
         if(fnOver){
             Apskt.on(id,"mouseover",fnOver);
