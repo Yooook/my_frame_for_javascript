@@ -63,10 +63,10 @@ Apskt.extend(Apskt,{
     /*悬浮*/
     hover : function(id,fnOver,fnOut){
         if(fnOver){
-            this.on(id,"mouseover",fnOver);
+            Apskt.on(id,"mouseover",fnOver);
         }
         if(fnOut){
-            this.on(id,"mouseout",fnOut);
+            Apskt.on(id,"mouseout",fnOut);
         }
     }, 
 
