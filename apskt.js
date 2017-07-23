@@ -11,8 +11,8 @@ var Apskt = function() {};
 
 // 框架基类方法
 Apskt.prototype = {
+    // 实现对象拷贝，利于后面框架模块的划分
 	extend : function(target,source){
-		// 遍历对象并拷贝
 		for(var i in source) {
 			target[i] = source[i];
 		}
@@ -104,9 +104,9 @@ Apskt.extend(Apskt,{
     //事件委托
     delegate:function (pid, eventType, selector, fn) {
         //参数处理
-        var parent = $$.$id(pid);
+        var parent = Apskt.getId(pid);
         function handle(e){
-            var target = $$.GetTarget(e);
+            var target = Apskt.GetTarget(e);
             if(target.nodeName.toLowerCase()=== selector || target.id === selector || target.className.indexOf(selector) != -1){
                 // 在事件冒泡的时候，遍历每个子孙后代，如果找到对应的元素，则执行如下函数
                 // 为什么使用call，因为call可以改变this指向
@@ -120,6 +120,8 @@ Apskt.extend(Apskt,{
     }
 })
 
+
+
 // 类型检测框架
 Apskt.extend(Apskt,{
 	isString : function(value) {
@@ -127,16 +129,20 @@ Apskt.extend(Apskt,{
 	}
 })
 
+
+
 // 选择器框架
 Apskt.extend(Apskt,{
-        //id选择器
+
+    //id选择器
     getId:function(id){
         return document.getElementById(id);
     },
+
     //tag选择器
     getTag:function(tag,context){
         if(typeof context == 'string'){
-            context = $$.$id(context);
+            context = Apskt.$id(context);
         }
 
         if(context){
@@ -145,32 +151,136 @@ Apskt.extend(Apskt,{
             return document.getElementsByTagName(tag);
         }
     },
+
     //class选择器
     getClass:function(className,parentId){
-    var i=0,len,dom=[],arr=[];
-    //如果传递过来的是字符串 ，则转化成元素对象
-    if( typeof parentId === 'string'){
-      parentId = document.getElementById(parentId);
-    }else{
-      parentId = document;
-    }
-//        如果兼容getElementsByClassName
-    if(parentId.getElementsByClassName){
-      return parentId.getElementsByClassName(className);
-    }else{
-      //如果浏览器不支持
-      dom = parentId.getElementsByTagName('*');
+        var i=0,len,dom=[],arr=[];
+        //如果传递过来的是字符串 ，则转化成元素对象
+        if( typeof parentId === 'string'){
+          parent = document.getElementById(parentId);
+        }else{
+          parent = document;
+        }
+        //如果兼容getElementsByClassName
+        if(parent.getElementsByClassName){
+          return parent.getElementsByClassName(className);
+        }else{
+          //如果浏览器不支持
+          dom = parent.getElementsByTagName('*');
 
-      for(i;len=dom.length,i<len;i++)
-      {
-        var array = dom[i].className.split(' ');
-        for (var j = 0; j < array.length; j++) {
-          if (array[j] == className) {
-            arr.push(dom[i]);
+          for(i;len=dom.length,i<len;i++)
+          {
+            var array = dom[i].className.split(' ');
+            for (var j = 0; j < array.length; j++) {
+              if (array[j] == className) {
+                arr.push(dom[i]);
+              }
+            }
           }
         }
-      }
-    }
-    return arr;
-  },
+        return arr;
+      },
+
+    //分组选择器
+    group:function(content) {
+        var result=[],doms=[];
+        var arr = Apskt.trim(content).split(',');
+        //alert(arr.length);
+        for(var i=0,len=arr.length;i<len;i++) {
+            var item = Apskt.trim(arr[i])
+            var first= item.charAt(0)
+            var index = item.indexOf(first)
+            if(first === '.') {
+                doms=Apskt.getClass(item.slice(index+1))
+                pushArray(doms,result)
+
+            }else if(first ==='#'){
+                doms=[Apskt.getId(item.slice(index+1))]//doms是数组，但是$id获取的不是数组，而是单个元素
+                pushArray(doms,result)
+            }else{
+                doms = Apskt.getTag(item)
+                pushArray(doms,result)
+            }
+        }
+        return result;
+
+        //重复的代码
+        function pushArray(doms,result){
+            for(var j= 0, domlen = doms.length; j < domlen; j++){
+                result.push(doms[j])
+            }
+        }
+    },
+    //层次选择器
+    layer:function (select){
+        //个个击破法则 -- 管道思想
+        var sel = Apskt.trim(select).split(' ');
+        var result=[];
+        var context=[];
+        for(var i = 0, len = sel.length; i < len; i++){
+            result=[];
+            var item = Apskt.trim(sel[i]);
+            var first = sel[i].charAt(0)
+            var index = item.indexOf(first)
+            if(first ==='#'){
+                //如果是#，找到该元素，
+                pushArray([Apskt.id(item.slice(index + 1))]);
+                context = result;
+            }else if(first ==='.'){
+                if(context.length){
+                    for(var j = 0, contextLen = context.length; j < contextLen; j++){
+                        pushArray(Apskt.getClass(item.slice(index + 1), context[j]));
+                    }
+                }else{
+                    pushArray(Apskt.getClass(item.slice(index + 1)));
+                }
+                context = result;
+            }else{
+
+                if(context.length){
+                    for(var j = 0, contextLen = context.length; j < contextLen; j++){
+                        pushArray(Apskt.getTag(item, context[j]));
+                    }
+                }else{
+                    pushArray(Apskt.getTag(item));
+                }
+                context = result;
+            }
+        }
+
+        return context;
+        //重复的代码
+        function pushArray(doms){
+            for(var j= 0, domlen = doms.length; j < domlen; j++){
+                result.push(doms[j])
+            }
+        }
+    },
+
+    //混合选择器（多组+层次）
+    blend:function(str) {
+        var result = [];
+        var item = Apskt.trim(str).split(',');
+        for(var i = 0, glen = item.length; i < glen; i++){
+            var select = Apskt.trim(item[i]);
+            var context = [];
+            context = Apskt.layer(select);
+            pushArray(context);
+
+        };
+        return result;
+
+        //重复的代码
+        function pushArray(doms){
+            for(var j= 0, domlen = doms.length; j < domlen; j++){
+                result.push(doms[j])
+            }
+        }
+    },
+
+    //html5选择器
+    query:function(selector,parentId){
+        context = parentId || document;
+        return  context.querySelectorAll(selector);
+    },
 })
