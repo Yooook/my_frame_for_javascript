@@ -5,7 +5,7 @@
  * 域名：www.apskt.com
  * 版权所有 违者必究
  */
-
+(function(window) {
 // 创建顶层的命名空间
 var Apskt = function() {};
 
@@ -481,11 +481,80 @@ Apskt.extend(Apskt,{
             return -1<(" "+element.className+" ").indexOf(" "+name+" ")
         }
     },
-    
+
     //获取
     getClass:function (id){
-        var doms = $$.$all(id)
+        var doms = Apskt.query(id)
         return Apskt.trim(doms[0].className).split(" ")
     }
 })
+
+//内容框架
+Apskt.extend(Apskt,{
+    //innerHTML的函数版本
+    html:function (context, value){
+        var doms = Apskt.query(context);
+        //设置
+        if(value){
+            for(var i= 0,len= doms.length; i<len; i++){
+                doms[i].innerHTML = value;
+            }
+        }else{
+            return doms[0].innerHTML
+        }
+    }
+})
+
+//动画框架
+Apskt.extend(Apskt,{
+    // 函数版本,动画时间进程,这用方式太繁杂,没有动画距离进程简单,主要体会成员私有化的思想
+    // animate : function (id,juli,duration) {
+    //    var dom = Apskt.getId(id);
+    //    var now = +new Date();
+    //    // var pass = +new Date();
+    //    // var yongshi = pass-now;
+    //    var tween = 0;
+    //    // var juli = 400;
+    //    // var step;
+    //    var timer;
+    //    timer = setInterval(move,30);
+    //    unction getTween(now,pass,all) {
+    //     // var yongshi = pass-now;
+    //     // var tween = yongshi/duration;
+    //     return (pass-now)/all;
+    //     }
+
+    //     function stop() {
+    //         clearInterval(timer);
+    //     }
+
+    //     function oneProperty(id,name,start,juli,tween) {
+    //         if (true) {
+
+    //         }else{
+    //             Apskt.css(id,name,(start+juli*tween) + 'px')
+    //             // dom.style[name] = juli*tween + 'px';
+    //         }
+    //     }
+        
+    //     function move() {
+    //         if (tween >= 1) {
+    //              stop();
+    //         }else {
+    //             pass = +new Date();
+    //         // var yongshi = pass-now;
+    //             tween = getTween(now,pass,duration);
+    //             // div.style.left = juli*tween + 'px';
+    //             oneProperty('div','left',0,juli,tween);
+    //         }
+            
+    //     } 
+    // }
+    
+
+
+})
+
+    window.$ = Apskt;
+})(window);
 
