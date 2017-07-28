@@ -219,7 +219,7 @@
         },
 
         //class选择器
-        getClass:function(className,parentId){
+        getCla:function(className,parentId){
             var i=0,len,dom=[],arr=[];
             //如果传递过来的是字符串 ，则转化成元素对象
             if( typeof parentId === 'string'){
@@ -447,12 +447,21 @@
 
         //文档视口的高度和宽度
         wWidth:function (){
-            // console.log(document.documentElement.clientWidth)
-            return document.documentElement.clientWidth
+            // 判断是否是标准模式，ie会有混杂模式
+            if (document.compatMode == 'CSS1Compat') {
+                return document.documentElement.clientWidth
+            }else {
+                return document.body.clientWidth
+            }
+            
         },
 
         wHeight:function (){
-            return document.documentElement.clientHeight
+            if (document.compatMode == 'CSS1Compat') {
+                return document.documentElement.clientHeight
+            }else {
+                return document.body.clientHeight
+            }
         },
 
         //文档滚动区域的整体的高和宽
@@ -482,8 +491,8 @@
 
     // 属性框架
     Apskt.extend(Apskt,{
-        attr:function(content, key, value){
-            var dom = Apskt.isString(context)?Apskt.query(context) : context;
+        attr:function(key, value){
+            var dom = this.elements;
             //如果是数组  比如tag
                 if(dom.length){
                     if(value){
