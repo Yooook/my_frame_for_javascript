@@ -22,7 +22,7 @@
         },
         //去除左边空格
         ltrim:function(){
-            this.elements = this.elements.replace(/(^\s*)/g,'&');
+            this.elements = this.elements.replace(/(^\s*)/g,'');
             return this;
         },
         //去除右边空格
